@@ -45,8 +45,8 @@ app.post('/addcard', async (req, res) => {
   try {
     let connection = await mysql.createConnection(dbConfig);
     await connection.execute(
-      'INSERT INTO cards (cardname, cardpic) VALUES (?, ?)',
-      [card_name, card_pic]          // body keys can stay the same
+      'INSERT INTO cards (cards_name, card_pic) VALUES (?, ?)',
+      [card_name, card_pic]
     );
     res
       .status(201)
