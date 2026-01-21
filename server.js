@@ -1,10 +1,10 @@
-// include the reuqired packages
+// include the required packages
 const express = require('express');
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 const port = 3000;
 
-//database config info
+// database config info
 const dbConfig = {
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -16,15 +16,10 @@ const dbConfig = {
   queueLimit: 0,
 };
 
-//initialize Express app
+// initialize Express app
 const app = express();
-//helps app to read JSON
+// helps app to read JSON
 app.use(express.json());
-
-//start the server
-app.listen(port, () => {
-  console.log('Server running on port', port);
-});
 
 // Example Route: Get all cards
 app.get('/allcards', async (req, res) => {
@@ -57,4 +52,41 @@ app.post('/addcard', async (req, res) => {
       .status(500)
       .json({ message: 'Server error - could not add card ' + card_name });
   }
+});
+
+// Example Route: Update a card (PUT)
+app.put('/updatecard/:id', async (req, res) => {
+  const id = req.params.id;
+  const { card_name, card_pic } = req.body;
+
+  try {
+    let connection = await mysql.createConnection(dbConfig);
+    await connection.execute(
+      'UPDATE cards SET cards_name = ?, card_pic = ? WHERE id = ?',
+      [card_name, card_pic, id]
+    );
+    res.status(200).json({ message: 'Card ' + id + ' updated successfully' });
+  } catch (err) {
+    console.error('UPDATE CARD ERROR:', err);
+    res.status(500).json({ message: 'Server error - could not update card ' + id });
+  }
+});
+
+// Example Route: Delete a card (DELETE) 
+app.delete('/deletecard/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    let connection = await mysql.createConnection(dbConfig);
+    await connection.execute('DELETE FROM cards WHERE id = ?', [id]);
+    res.status(200).json({ message: 'Card ' + id + ' deleted successfully' });
+  } catch (err) {
+    console.error('DELETE CARD ERROR:', err);
+    res.status(500).json({ message: 'Server error - could not delete card ' + id });
+  }
+});
+
+// start the server
+app.listen(port, () => {
+  console.log('Server running on port', port);
 });
